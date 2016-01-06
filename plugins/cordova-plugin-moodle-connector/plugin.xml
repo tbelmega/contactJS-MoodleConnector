@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="cordova-plugin-moodle-connector"
+        version="1.0.0">
+
+    <name>Cordova Moodle Connector</name>
+
+    <description>
+        This plugin uses an HTTP connection to a moodle server,
+        in order to get the test grades of a student.
+    </description>
+
+    <engines>
+        <engine name="cordova-android" version="=2.2.0" />
+    </engines>
+
+    <asset src="www/CordovaMoodleConnector.js" target="plugins/CordovaMoodleConnector.js" />
+
+    <!-- android -->
+    <platform name="android">
+        <config-file target="config.xml" parent="/*">
+            <feature name="CordovaMoodleConnector">
+                <param name="android-package" value="de.tbelmega.cordovamoodleconnector.CordovaMoodleConnector"/>
+            </feature>
+        </config-file>
+
+        <source-file src="src/android/de/tbelmega/cordovamoodleconnector/CordovaMoodleConnector.java" target-dir="src/de/tbelmega/cordovamoodleconnector" />
+    </platform>
+
+
+</plugin>
