@@ -11,7 +11,7 @@ define(['contactJS'], function (contactJS) {
             const: [
 
             ],
-            updateInterval: 10000 //TODO: update once in a minute
+            updateInterval: 60000
         };
 
         /**
@@ -57,7 +57,7 @@ define(['contactJS'], function (contactJS) {
 
             //execute getExamResult function from plugin
             console.log("MoodleExamWidget: Call MoodleConnectorPlugin now.");
-            cordova.plugins.moodleconnector.getExamResult("Test1", successFnc, errorFnc);
+            window.moodleconnector.getExamResult("Test1", successFnc, errorFnc);
 
         };
 

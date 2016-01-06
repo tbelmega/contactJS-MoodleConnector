@@ -10,9 +10,13 @@
         in order to get the test grades of a student.
     </description>
 
+    <author>Thiemo Belmega</author>
+
     <engines>
-        <engine name="cordova-android" version="=2.2.0" />
+        <engine name="cordova-android" version=">=4.0.0" />
     </engines>
+
+
 
     <asset src="www/CordovaMoodleConnector.js" target="plugins/CordovaMoodleConnector.js" />
 
@@ -23,6 +27,10 @@
                 <param name="android-package" value="de.tbelmega.cordovamoodleconnector.CordovaMoodleConnector"/>
             </feature>
         </config-file>
+
+        <js-module src="www/CordovaMoodleConnector.js" name="moodleconnector">
+            <clobbers target="window.moodleconnector" />
+        </js-module>
 
         <source-file src="src/android/de/tbelmega/cordovamoodleconnector/CordovaMoodleConnector.java" target-dir="src/de/tbelmega/cordovamoodleconnector" />
     </platform>
