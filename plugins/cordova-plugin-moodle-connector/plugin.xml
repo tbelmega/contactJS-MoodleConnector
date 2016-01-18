@@ -20,6 +20,7 @@
 
     <asset src="www/CordovaMoodleConnector.js" target="plugins/CordovaMoodleConnector.js" />
 
+
     <!-- android -->
     <platform name="android">
         <config-file target="config.xml" parent="/*">
@@ -33,6 +34,8 @@
         </js-module>
 
         <source-file src="src/android/de/tbelmega/cordovamoodleconnector/CordovaMoodleConnector.java" target-dir="src/de/tbelmega/cordovamoodleconnector" />
+        <source-file src="src/android/de/tbelmega/cordovamoodleconnector/MoodleHttpClient.java" target-dir="src/de/tbelmega/cordovamoodleconnector" />
+        <source-file src="src/android/de/tbelmega/cordovamoodleconnector/GradesTable.java" target-dir="src/de/tbelmega/cordovamoodleconnector" />
     </platform>
 
 

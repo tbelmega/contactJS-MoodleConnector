@@ -13,21 +13,17 @@ import java.io.IOException;
  */
 public class CordovaMoodleConnector extends CordovaPlugin {
 
-    /*
-     * server url, auth token, user ID and course ID are hard coded, as long as MOTIVATE does not support configuration
-     */
-    static final String MOODLE_SERVER_URL = "http://localhost/webservice/rest/server.php";
-    static final String AUTH_TOKEN = "6a56dc3fa0adfaae8fcb97eb6bdde2e6";
-    static final int USER_ID = 4;
-    static final int COURSE_ID = 2;
-
-
     public static final String ACTION_GET_EXAM_RESULT = "getExamResult";
 
     /**
      * This method is called by the JavaScript part of the application.
      * @param action          The action to execute.
-     * @param args            The exec() arguments. The first argument must be the name of a test in the moodle course.
+     * @param args            The exec() arguments.
+     *                          0 - The moodle server url
+     *                          1 - An array of test names
+     *                          2 - A moodle user ID
+     *                          3 - A moodle auth token
+     *                          4 - A moodle course ID
      * @param callbackContext The callback context used when calling back into JavaScript.
      * @return
      * @throws JSONException
@@ -40,29 +36,45 @@ public class CordovaMoodleConnector extends CordovaPlugin {
     }
 
     private boolean doActionGetExamResult(JSONArray args, CallbackContext callbackContext) throws JSONException {
-        JSONObject gradeReport;
 
+        // get request parameters from args object
+        String   moodleServerUrl = args.getString(0);
+        int userId = args.getInt(2);
+        int courseId = args.getInt(4);
+        String authToken = args.getString(3);
+
+        JSONObject gradeReport;
         //try to retrieve grades table from moodle
         try {
-            gradeReport = new MoodleHttpClient(MOODLE_SERVER_URL, AUTH_TOKEN).getGradeReport(COURSE_ID,USER_ID);
+
+            gradeReport = new MoodleHttpClient(moodleServerUrl, authToken).getGradeReport(courseId,userId);
         } catch (IOException e) {
-            callbackContext.error("Could not retrieve grades table from moodle: " + e.getMessage());
+            callbackContext.error("CordovaMoodleConnector: Could not retrieve grades table from moodle: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
 
-        //read result of requested test from table
-        GradesTable grades = new GradesTable(gradeReport);
-        String testName = args.getString(0);
-        Integer result = grades.getPercentage(testName);
+        System.out.println("CordovaMoodleConnector: Grade report is \n" + gradeReport.toString(4));
 
-        if (result == null) {
-            callbackContext.error("Could not find specified test:" + testName);
-            return false;
+
+        //read result of tests from table
+        GradesTable grades = new GradesTable(gradeReport);
+
+        System.out.println("CordovaMoodleConnector: args are \n" + args.toString(4));
+
+        JSONArray requestedTestNames = args.getJSONArray(1);
+        JSONArray results = new JSONArray();
+
+        for (int i = 0; i < requestedTestNames.length(); i++) {
+            String testName = requestedTestNames.getString(i);
+            Integer result = grades.getPercentage(testName);
+            results.put(result);
         }
 
-        //pass requested result back to JavaScript method
-        callbackContext.success(result.toString());
+        System.out.println("CordovaMoodleConnector: Send test results back to JavaScript now: \n" + results.toString(4));
+
+        //pass requested result array back to JavaScript method
+        callbackContext.success(results.toString());
         return true;
     }
 

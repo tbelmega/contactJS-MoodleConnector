@@ -6,12 +6,17 @@ define(['contactJS'], function (contactJS) {
                     name: 'MOODLE_EXAM1_RESULT',
                     type: 'INTEGER',
                     parameterList: []
+                },
+                {
+                    name: 'MOODLE_EXAM2_RESULT',
+                    type: 'INTEGER',
+                    parameterList: []
                 }
             ],
             const: [
 
             ],
-            updateInterval: 60000
+            updateInterval: 15000
         };
 
         /**
@@ -41,10 +46,14 @@ define(['contactJS'], function (contactJS) {
             //define success callback function
             var successFnc = function (success) {
                 console.log("MoodleExamWidget: Success function called with parameter " +  success);
+                var grades = JSON.parse(success);
 
                 //respond
                 var response = new contactJS.ContextInformationList();
-                response.put(this.getOutputContextInformation().getItems()[0].setValue(success));
+
+                for (var i = 0; i < grades.length; i++) {
+                    response.put(self.getOutputContextInformation().getItems()[i].setValue(grades[i]));
+                }
 
                 self._sendResponse(response, callback)
             };
@@ -57,7 +66,7 @@ define(['contactJS'], function (contactJS) {
 
             //execute getExamResult function from plugin
             console.log("MoodleExamWidget: Call MoodleConnectorPlugin now.");
-            window.moodleconnector.getExamResult("Test1", successFnc, errorFnc);
+            window.moodleconnector.getExamResult(['Test1','Test2'],successFnc, errorFnc);
 
         };
 

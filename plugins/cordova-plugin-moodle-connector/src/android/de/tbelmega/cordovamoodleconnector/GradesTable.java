@@ -13,7 +13,7 @@ import java.util.Map;
 public class GradesTable {
 
     //map to store test name and result in %
-    private Map<String, Integer> percentages = new HashMap<>();
+    private Map<String, Integer> percentages = new HashMap<String, Integer>();
 
     public GradesTable(JSONObject jsonContent) throws JSONException {
         JSONArray tabledata = jsonContent.getJSONArray("tables").getJSONObject(0).getJSONArray("tabledata");

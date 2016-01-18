@@ -37,6 +37,8 @@ public class MoodleHttpClient {
 
         String responseContent = readResponse(connection);
 
+        System.out.println(responseContent);
+
         return new JSONObject(responseContent);
     }
 
