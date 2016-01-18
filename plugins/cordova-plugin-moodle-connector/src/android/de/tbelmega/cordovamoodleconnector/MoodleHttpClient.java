@@ -1,19 +1,15 @@
 package de.tbelmega.cordovamoodleconnector;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Created by Thiemo on 06.01.2016.
@@ -22,34 +18,66 @@ public class MoodleHttpClient {
 
 
     public static final String MOODLE_FUNCTION_GRADEREPORT = "gradereport_user_get_grades_table";
-    private final String url;
+    private final URL url;
     private final String authToken;
-    private final HttpClient client;
 
-    public MoodleHttpClient(String moodleServerUrl, String authToken) {
-        this.url = moodleServerUrl;
+
+    public MoodleHttpClient(String moodleServerUrl, String authToken) throws MalformedURLException {
+        this.url = new URL(moodleServerUrl);
         this.authToken = authToken;
-        this.client = HttpClientBuilder.create().build();
+
     }
 
     public JSONObject getGradeReport(Integer courseId, Integer userId) throws IOException, JSONException {
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-        HttpPost request = new HttpPost(url);
-        setPostParameters(courseId, userId, request);
+        sendRequest(courseId, userId, connection);
 
-        HttpResponse response = client.execute(request);
-        String responsePayload = EntityUtils.toString(response.getEntity());
+        int responseCode = connection.getResponseCode();
 
-        return new JSONObject(responsePayload);
+        String responseContent = readResponse(connection);
+
+        return new JSONObject(responseContent);
     }
 
-    private void setPostParameters(Integer courseId, Integer userId, HttpPost request) throws UnsupportedEncodingException {
-        ArrayList<NameValuePair> postParameters = new ArrayList<>();
-        postParameters.add(new BasicNameValuePair("moodlewsrestformat", "json"));
-        postParameters.add(new BasicNameValuePair("wsfunction", MOODLE_FUNCTION_GRADEREPORT));
-        postParameters.add(new BasicNameValuePair("wstoken", authToken));
-        postParameters.add(new BasicNameValuePair("courseid", courseId.toString()));
-        postParameters.add(new BasicNameValuePair("userid", userId.toString()));
-        request.setEntity(new UrlEncodedFormEntity(postParameters));
+    private String readResponse(HttpURLConnection connection) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String line;
+        StringBuilder responsePayload = new StringBuilder();
+
+        while((line = br.readLine()) != null) {
+            responsePayload.append(line);
+        }
+
+        return responsePayload.toString();
     }
+
+    private void sendRequest(Integer courseId, Integer userId, HttpURLConnection connection) throws IOException {
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("USER-AGENT","Mozilla/5.0");
+        connection.setRequestProperty("ACCEPT-LANGUAGE","de-DE, de, en-US, en");
+
+        connection.setDoOutput(true);
+
+        DataOutputStream dStream = new DataOutputStream(connection.getOutputStream());
+
+        dStream.writeBytes(createPostParameters(courseId, userId));
+        dStream.flush();
+        dStream.close();
+    }
+
+    private String createPostParameters(Integer courseId, Integer userId) {
+        StringBuilder postParameters = new StringBuilder()
+                .append("moodlewsrestformat=json")
+                .append("&")
+                .append("wsfunction=" + MOODLE_FUNCTION_GRADEREPORT)
+                .append("&")
+                .append("wstoken=" + authToken)
+                .append("&")
+                .append("courseid=" + courseId.toString())
+                .append("&")
+                .append("userid=" + userId.toString());
+        return postParameters.toString();
+    }
+
 }
